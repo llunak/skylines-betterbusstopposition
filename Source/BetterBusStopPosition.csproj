@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputPath>..\</OutputPath>
+    <TargetFramework>net35</TargetFramework>
+    <AssemblyTitle>Better Bus Stop Position</AssemblyTitle>
+    <AssemblyVersion>2025.0531.1</AssemblyVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>../../References/Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>../../References/UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="ICities">
+      <HintPath>../../References/ICities.dll</HintPath>
+    </Reference>
+    <PackageReference Include="CitiesHarmony.API" Version="2.2.0" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="sh -c 'mkdir -p &quot;/home/steam/.local/share/Steam/steamapps/common/Cities_Skylines/Files/Mods/$(ProjectName)&quot;; rm -f &quot;/home/steam/.local/share/Steam/steamapps/common/Cities_Skylines/Files/Mods/$(ProjectName)/$(TargetFileName)&quot;;cp &quot;$(TargetPath)&quot; &quot;/home/steam/.local/share/Steam/steamapps/common/Cities_Skylines/Files/Mods/$(ProjectName)/&quot;" />
+  </Target>
+</Project>
