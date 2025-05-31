@@ -31,6 +31,6 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="sh -c 'mkdir -p &quot;/home/steam/.local/share/Steam/steamapps/common/Cities_Skylines/Files/Mods/$(ProjectName)&quot;; rm -f &quot;/home/steam/.local/share/Steam/steamapps/common/Cities_Skylines/Files/Mods/$(ProjectName)/$(TargetFileName)&quot;;cp &quot;$(TargetPath)&quot; &quot;/home/steam/.local/share/Steam/steamapps/common/Cities_Skylines/Files/Mods/$(ProjectName)/&quot;" />
+    <Exec Command="sh -c 'mkdir -p &quot;/home/steam/.local/share/Steam/steamapps/common/Cities_Skylines/Files/Mods/$(ProjectName)&quot;; rm -f &quot;/home/steam/.local/share/Steam/steamapps/common/Cities_Skylines/Files/Mods/$(ProjectName)/$(TargetFileName)&quot;;cp &quot;$(TargetPath)&quot; &quot;/home/steam/.local/share/Steam/steamapps/common/Cities_Skylines/Files/Mods/$(ProjectName)/&quot;;cp &quot;$(TargetDir)CitiesHarmony.API.dll&quot; &quot;/home/steam/.local/share/Steam/steamapps/common/Cities_Skylines/Files/Mods/$(ProjectName)/&quot;'" />
   </Target>
 </Project>
