@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputPath>..\</OutputPath>
+    <OutputPath>out</OutputPath>
     <TargetFramework>net35</TargetFramework>
     <AssemblyTitle>Better Bus Stop Position</AssemblyTitle>
     <AssemblyVersion>2025.0531.1</AssemblyVersion>
