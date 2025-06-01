@@ -77,11 +77,15 @@ public static class BusAI_Patch
         if(( vehicleData.m_flags & Vehicle.Flags.Leaving ) != 0 )
             return laneOffset;
         float laneLength = lane.m_length;
-        float vehicleLength = vehicleData.CalculateTotalLength( vehicleID );
-        if( laneLength <= vehicleLength )
+        // If the margin is too small, the bus stops on the curb and then takes a sharp turn.
+        // If it is too large, space is wasted.
+        // I haven't found out how to calculate this properly, so this is what seems to be good enough.
+        float margin = laneLength / 6;
+        float vehicleLength = vehicleData.Info.m_generatedInfo.m_size.z; // Ignore trailers, the main vehicle position matters.
+        // The lane offset is 0.5f when at the (vanilla) stop position, calculate the new position.
+        float newStopOffset = 1 - ( margin + vehicleLength / 2 ) / laneLength;
+        if( newStopOffset < 0.5f ) // If not an improvement, ignore.
             return laneOffset;
-        // The lane offset is 0.5f when at the (vanilla) stop position, move that place to 0.8f.
-        const float newStopOffset = 0.8f;
         // When the stop is in the opposite direction of the segment, flip, calculate and flip back.
         bool inverted = ( laneInfo.m_finalDirection & NetInfo.Direction.Backward ) != 0;
         if(( flags & NetSegment.Flags.Invert ) != 0 )
