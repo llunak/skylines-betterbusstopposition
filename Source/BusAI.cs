@@ -39,9 +39,10 @@ public static class BusAI_Patch
                 codes.Insert( i + 2, new CodeInstruction( OpCodes.Stloc_S, localFlags.LocalIndex )); // store the result
             }
             // The function has code:
-            // CalculateStopPositionAndDirection((float)(int)offset * 0.003921569f, num, out pos, out dir);
+            // instance.m_lanes.m_buffer[laneID].CalculateStopPositionAndDirection((float)(int)offset * 0.003921569f, num, out pos, out dir);
             // Change to:
-            // CalculateStopPositionAndDirection(CalculateSegmentPosition_Hook((float)(int)offset * 0.003921569f, vehicleData, lane, localFlags),
+            // instance.m_lanes.m_buffer[laneID].CalculateStopPositionAndDirection(CalculateSegmentPosition_Hook(
+            //     instance.m_lanes.m_buffer[laneID], (float)(int)offset * 0.003921569f, vehicleId, vehicleData, lane, localFlags),
             //     num, out pos, out dir);
             if( found1 && localFlags != null && codes[ i ].opcode == OpCodes.Ldarg_S && codes[ i ].operand.ToString() == "5"
                 && i + 7 < codes.Count
@@ -50,11 +51,13 @@ public static class BusAI_Patch
                 && codes[ i + 7 ].opcode == OpCodes.Call
                 && codes[ i + 7 ].operand.ToString() == "Void CalculateStopPositionAndDirection(Single, Single, Vector3 ByRef, Vector3 ByRef)" )
             {
+                codes.Insert( i, new CodeInstruction( OpCodes.Dup )); // Duplicate the 'this' NetLane argument.
                 // Keep the offset calculation argument.
-                codes.Insert( i + 4, new CodeInstruction( OpCodes.Ldarg_2 )); // Load 'vehicleData'.
-                codes.Insert( i + 5, new CodeInstruction( OpCodes.Ldloc_2 )); // Load 'lane' (loc #2 above).
-                codes.Insert( i + 6, new CodeInstruction( OpCodes.Ldloc_S, localFlags.LocalIndex )); // Load localFlags (above).
-                codes.Insert( i + 7, new CodeInstruction( OpCodes.Call,
+                codes.Insert( i + 4 + 1, new CodeInstruction( OpCodes.Ldarg_1 )); // Load 'vehicleId'.
+                codes.Insert( i + 5 + 1, new CodeInstruction( OpCodes.Ldarg_2 )); // Load 'vehicleData'.
+                codes.Insert( i + 6 + 1, new CodeInstruction( OpCodes.Ldloc_2 )); // Load 'lane' (loc #2 above).
+                codes.Insert( i + 7 + 1, new CodeInstruction( OpCodes.Ldloc_S, localFlags.LocalIndex )); // Load localFlags (above).
+                codes.Insert( i + 8 + 1, new CodeInstruction( OpCodes.Call,
                     typeof( BusAI_Patch ).GetMethod( nameof( CalculateSegmentPosition_Hook ))));
                 // Return value will replace the offset.
                 found2 = true;
@@ -66,11 +69,16 @@ public static class BusAI_Patch
         return codes;
     }
 
-    public static float CalculateSegmentPosition_Hook( float laneOffset, ref Vehicle vehicleData, NetInfo.Lane laneInfo, NetSegment.Flags flags )
+    public static float CalculateSegmentPosition_Hook( ref NetLane lane, float laneOffset, ushort vehicleID, ref Vehicle vehicleData,
+        NetInfo.Lane laneInfo, NetSegment.Flags flags )
     {
         // Do not change anything when leaving a stop, the start point is calculated from the position of the bus,
         // so everything is correct without changes.
         if(( vehicleData.m_flags & Vehicle.Flags.Leaving ) != 0 )
+            return laneOffset;
+        float laneLength = lane.m_length;
+        float vehicleLength = vehicleData.CalculateTotalLength( vehicleID );
+        if( laneLength <= vehicleLength )
             return laneOffset;
         // The lane offset is 0.5f when at the (vanilla) stop position, move that place to 0.8f.
         const float newStopOffset = 0.8f;
