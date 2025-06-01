@@ -100,4 +100,15 @@ public static class BusAI_Patch
     }
 }
 
+[HarmonyPatch(typeof(TrolleybusAI))]
+public static class TrolleybusAI_Patch
+{
+    [HarmonyTranspiler]
+    [HarmonyPatch(nameof(CalculateSegmentPosition))]
+    public static IEnumerable<CodeInstruction> CalculateSegmentPosition(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+    {
+        return BusAI_Patch.CalculateSegmentPosition( instructions, generator );
+    }
+}
+
 }
